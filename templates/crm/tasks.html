@@ -1,0 +1,79 @@
+{% extends "crm/base_crm.html" %}
+{% block title %}Tasks - CRM{% endblock %}
+{% block crm_content %}
+<div class="section-header">
+    <h2>Tasks</h2>
+    <div class="d-flex gap-2">
+        <div class="category-chips" style="margin-bottom:0">
+            <a href="{{ url_for('crm.tasks') }}" class="category-chip {% if not status_filter %}active{% endif %}">All</a>
+            <a href="{{ url_for('crm.tasks', status='pending') }}" class="category-chip {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+            <a href="{{ url_for('crm.tasks', status='in_progress') }}" class="category-chip {% if status_filter == 'in_progress' %}active{% endif %}">In Progress</a>
+            <a href="{{ url_for('crm.tasks', status='completed') }}" class="category-chip {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+        </div>
+        <a href="{{ url_for('crm.new_task') }}" class="btn btn-primary">+ New Task</a>
+    </div>
+</div>
+
+{% if tasks %}
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Contact</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>
+                        <strong>{{ task.title }}</strong>
+                        {% if task.description %}<br><span style="font-size:.8rem;color:var(--gray-500)">{{ task.description[:60] }}...</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if task.contact %}
+                            <a href="{{ url_for('crm.contact_detail', id=task.contact.id) }}">{{ task.contact.first_name }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge badge-{% if task.priority == 'urgent' %}danger{% elif task.priority == 'high' %}warning{% elif task.priority == 'low' %}gray{% else %}info{% endif %}">
+                            {{ task.priority|title }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-{% if task.status == 'completed' %}success{% elif task.status == 'in_progress' %}info{% else %}warning{% endif %}">
+                            {{ task.status|replace('_', ' ')|title }}
+                        </span>
+                    </td>
+                    <td>{{ task.due_date.strftime('%d %b %Y') if task.due_date else '-' }}</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            {% if task.status != 'completed' %}
+                            <form method="POST" action="{{ url_for('crm.complete_task', id=task.id) }}">
+                                <button class="btn btn-success btn-sm">Done</button>
+                            </form>
+                            {% endif %}
+                            <a href="{{ url_for('crm.edit_task', id=task.id) }}" class="btn btn-outline btn-sm">Edit</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="icon">&#9745;</div>
+    <p>No tasks found.</p>
+    <a href="{{ url_for('crm.new_task') }}" class="btn btn-primary">Create Task</a>
+</div>
+{% endif %}
+{% endblock %}
