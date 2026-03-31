@@ -1,0 +1,62 @@
+{% extends "crm/base_crm.html" %}
+{% block title %}{{ 'Edit' if task else 'New' }} Task - CRM{% endblock %}
+{% block crm_content %}
+<div class="section-header">
+    <h2>{{ 'Edit' if task else 'New' }} Task</h2>
+    <a href="{{ url_for('crm.tasks') }}" class="btn btn-outline">Back to Tasks</a>
+</div>
+
+<div class="card" style="max-width:700px">
+    <div class="card-body">
+        <form method="POST">
+            <div class="form-group">
+                <label>Title *</label>
+                <input type="text" name="title" class="form-control" required value="{{ task.title if task else '' }}">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" class="form-control">{{ task.description if task else '' }}</textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Contact</label>
+                    <select name="contact_id" class="form-control">
+                        <option value="">-- None --</option>
+                        {% for c in contacts %}
+                            <option value="{{ c.id }}" {% if task and task.contact_id == c.id %}selected{% endif %}>{{ c.first_name }} {{ c.last_name or '' }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select name="priority" class="form-control">
+                        {% for p in ['low', 'medium', 'high', 'urgent'] %}
+                            <option value="{{ p }}" {% if task and task.priority == p %}selected{% endif %}>{{ p|title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Due Date</label>
+                    <input type="date" name="due_date" class="form-control" value="{{ task.due_date.strftime('%Y-%m-%d') if task and task.due_date else '' }}">
+                </div>
+                {% if task %}
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" class="form-control">
+                        {% for s in ['pending', 'in_progress', 'completed', 'cancelled'] %}
+                            <option value="{{ s }}" {% if task.status == s %}selected{% endif %}>{{ s|replace('_', ' ')|title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">{{ 'Update' if task else 'Create' }} Task</button>
+                <a href="{{ url_for('crm.tasks') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
