@@ -1,0 +1,95 @@
+{% extends "crm/base_crm.html" %}
+{% block title %}Leads & Pipeline - CRM{% endblock %}
+{% block crm_content %}
+<div class="section-header">
+    <h2>Leads & Pipeline</h2>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('crm.leads', view='list') }}" class="btn {% if view == 'list' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">List</a>
+        <a href="{{ url_for('crm.leads', view='pipeline') }}" class="btn {% if view == 'pipeline' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Pipeline</a>
+        <a href="{{ url_for('crm.new_lead') }}" class="btn btn-primary">+ New Lead</a>
+    </div>
+</div>
+
+{% if view == 'pipeline' %}
+<!-- Pipeline Board View -->
+<div class="pipeline-board">
+    {% for stage in stages %}
+    <div class="pipeline-column">
+        <h4>
+            {{ stage|title }}
+            <span class="count">{{ pipeline[stage]|length }}</span>
+        </h4>
+        {% for lead in pipeline[stage] %}
+        <div class="pipeline-card">
+            <div class="deal-title">{{ lead.title }}</div>
+            <div class="deal-value">&pound;{{ "{:,.0f}".format(lead.value) }}</div>
+            <div class="deal-contact">{{ lead.contact.first_name if lead.contact else 'No contact' }}</div>
+            <div class="d-flex justify-between mt-2" style="font-size:.75rem">
+                <span>{{ lead.probability }}% likely</span>
+                <a href="{{ url_for('crm.edit_lead', id=lead.id) }}">Edit</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<!-- List View -->
+{% if leads %}
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Lead</th>
+                    <th>Contact</th>
+                    <th>Value</th>
+                    <th>Stage</th>
+                    <th>Probability</th>
+                    <th>Expected Close</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads %}
+                <tr>
+                    <td><strong>{{ lead.title }}</strong></td>
+                    <td>
+                        {% if lead.contact %}
+                            <a href="{{ url_for('crm.contact_detail', id=lead.contact.id) }}">{{ lead.contact.first_name }} {{ lead.contact.last_name or '' }}</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td><strong style="color:var(--primary)">&pound;{{ "{:,.0f}".format(lead.value) }}</strong></td>
+                    <td>
+                        <span class="badge badge-{% if lead.stage == 'won' %}success{% elif lead.stage == 'lost' %}danger{% elif lead.stage == 'negotiation' %}warning{% else %}info{% endif %}">
+                            {{ lead.stage|title }}
+                        </span>
+                    </td>
+                    <td>{{ lead.probability }}%</td>
+                    <td>{{ lead.expected_close.strftime('%d %b %Y') if lead.expected_close else '-' }}</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('crm.edit_lead', id=lead.id) }}" class="btn btn-outline btn-sm">Edit</a>
+                            <form method="POST" action="{{ url_for('crm.delete_lead', id=lead.id) }}" onsubmit="return confirm('Delete?')">
+                                <button class="btn btn-danger btn-sm">Del</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="icon">&#128200;</div>
+    <p>No leads yet.</p>
+    <a href="{{ url_for('crm.new_lead') }}" class="btn btn-primary">Create First Lead</a>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
