@@ -1,0 +1,139 @@
+{% extends "crm/base_crm.html" %}
+{% block title %}CRM Dashboard - MarketHub{% endblock %}
+{% block crm_content %}
+<div class="section-header">
+    <h2>Dashboard</h2>
+    <span style="color:var(--gray-500)">Welcome back, {{ session.get('username', 'Admin') }}</span>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total Contacts</div>
+        <div class="stat-value">{{ total_contacts }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Open Leads</div>
+        <div class="stat-value">{{ open_leads }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Pipeline Value</div>
+        <div class="stat-value">&pound;{{ "{:,.0f}".format(pipeline_value) }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">&pound;{{ "{:,.0f}".format(total_revenue) }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value">{{ total_orders }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Won Deals</div>
+        <div class="stat-value">{{ won_leads }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Pending Tasks</div>
+        <div class="stat-value">{{ pending_tasks }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-value">{{ total_leads }}</div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <!-- Pipeline Overview -->
+    <div class="chart-container">
+        <h3>Pipeline Overview</h3>
+        <div class="bar-chart">
+            {% set max_val = namespace(v=1) %}
+            {% for stage, data in pipeline_data.items() %}
+                {% if data.count > max_val.v %}{% set max_val.v = data.count %}{% endif %}
+            {% endfor %}
+            {% for stage, data in pipeline_data.items() %}
+            <div class="bar-item">
+                <div class="bar-value">{{ data.count }}</div>
+                <div class="bar" style="height:{{ (data.count / max_val.v * 160)|int if max_val.v > 0 else 4 }}px"></div>
+                <div class="bar-label">{{ stage|title }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent Leads -->
+    <div class="card">
+        <div class="card-header">
+            Recent Leads
+            <a href="{{ url_for('crm.leads') }}" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <tbody>
+                    {% for lead in recent_leads %}
+                    <tr>
+                        <td>
+                            <strong>{{ lead.title }}</strong><br>
+                            <span style="font-size:.8rem;color:var(--gray-500)">{{ lead.contact.first_name if lead.contact else 'No contact' }}</span>
+                        </td>
+                        <td class="text-right">
+                            <strong style="color:var(--primary)">&pound;{{ "{:,.0f}".format(lead.value) }}</strong><br>
+                            <span class="badge badge-{% if lead.stage == 'won' %}success{% elif lead.stage == 'lost' %}danger{% else %}info{% endif %}">{{ lead.stage|title }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px">
+    <!-- Recent Orders -->
+    <div class="card">
+        <div class="card-header">Recent Orders</div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>
+                            <strong>{{ order.order_number }}</strong><br>
+                            <span style="font-size:.8rem;color:var(--gray-500)">{{ order.created_at.strftime('%d %b %Y') }}</span>
+                        </td>
+                        <td class="text-right">
+                            <strong>&pound;{{ "%.2f"|format(order.total) }}</strong><br>
+                            <span class="badge badge-{% if order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% else %}warning{% endif %}">{{ order.status|title }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Upcoming Tasks -->
+    <div class="card">
+        <div class="card-header">
+            Upcoming Tasks
+            <a href="{{ url_for('crm.new_task') }}" class="btn btn-primary btn-sm">+ Add Task</a>
+        </div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <tbody>
+                    {% for task in upcoming_tasks %}
+                    <tr>
+                        <td>
+                            <strong>{{ task.title }}</strong><br>
+                            <span style="font-size:.8rem;color:var(--gray-500)">{{ task.due_date.strftime('%d %b %Y') if task.due_date else 'No due date' }}</span>
+                        </td>
+                        <td class="text-right">
+                            <span class="badge badge-{% if task.priority == 'urgent' %}danger{% elif task.priority == 'high' %}warning{% else %}gray{% endif %}">{{ task.priority|title }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
