@@ -1,0 +1,79 @@
+{% extends "crm/base_crm.html" %}
+{% block title %}Analytics - CRM{% endblock %}
+{% block crm_content %}
+<div class="section-header">
+    <h2>Analytics</h2>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">Lead Conversion Rate</div>
+        <div class="stat-value">{{ conversion_rate }}%</div>
+        <div class="stat-change">{{ won_leads }} won / {{ total_leads }} total</div>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <!-- Revenue Chart -->
+    <div class="chart-container">
+        <h3>Revenue (Last 6 Months)</h3>
+        <div class="bar-chart">
+            {% set max_rev = namespace(v=1) %}
+            {% for m in months %}
+                {% if m.revenue > max_rev.v %}{% set max_rev.v = m.revenue %}{% endif %}
+            {% endfor %}
+            {% for m in months %}
+            <div class="bar-item">
+                <div class="bar-value">&pound;{{ "{:,.0f}".format(m.revenue) }}</div>
+                <div class="bar" style="height:{{ (m.revenue / max_rev.v * 160)|int if max_rev.v > 0 else 4 }}px"></div>
+                <div class="bar-label">{{ m.label }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Orders Chart -->
+    <div class="chart-container">
+        <h3>Orders (Last 6 Months)</h3>
+        <div class="bar-chart">
+            {% set max_ord = namespace(v=1) %}
+            {% for m in months %}
+                {% if m.orders > max_ord.v %}{% set max_ord.v = m.orders %}{% endif %}
+            {% endfor %}
+            {% for m in months %}
+            <div class="bar-item">
+                <div class="bar-value">{{ m.orders }}</div>
+                <div class="bar" style="height:{{ (m.orders / max_ord.v * 160)|int if max_ord.v > 0 else 4 }}px;background:var(--secondary)"></div>
+                <div class="bar-label">{{ m.label }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% if top_products %}
+<div class="card mt-3">
+    <div class="card-header">Top Products by Revenue</div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Units Sold</th>
+                    <th>Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for name, sold, revenue in top_products %}
+                <tr>
+                    <td><strong>{{ name }}</strong></td>
+                    <td>{{ sold }}</td>
+                    <td><strong style="color:var(--primary)">&pound;{{ "{:,.2f}".format(revenue) }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
