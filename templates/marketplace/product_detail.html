@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} - MarketHub{% endblock %}
+{% block content %}
+<div class="container main-content">
+    <div class="product-detail">
+        <div class="product-detail-image">
+            {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}">
+            {% else %}
+                <div class="placeholder" style="font-size:5rem;color:var(--gray-300)">&#128722;</div>
+            {% endif %}
+        </div>
+        <div class="product-detail-info">
+            <div class="product-category" style="color:var(--gray-500);font-size:.9rem;margin-bottom:4px">
+                {{ product.category.name if product.category else 'Uncategorised' }}
+            </div>
+            <h1>{{ product.name }}</h1>
+            <div class="price">
+                &pound;{{ "%.2f"|format(product.price) }}
+                {% if product.compare_price %}
+                    <span style="text-decoration:line-through;color:var(--gray-400);font-size:1.2rem;margin-left:8px">&pound;{{ "%.2f"|format(product.compare_price) }}</span>
+                {% endif %}
+            </div>
+            {% if product.stock > 0 %}
+                <div class="stock">&#10004; In stock ({{ product.stock }} available)</div>
+            {% else %}
+                <div class="stock out">&#10008; Out of stock</div>
+            {% endif %}
+            <p style="color:var(--gray-600);margin-bottom:24px">{{ product.description or 'No description available.' }}</p>
+            {% if product.stock > 0 %}
+            <form method="POST" action="{{ url_for('marketplace.add_to_cart', product_id=product.id) }}" class="d-flex gap-2 align-center">
+                <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="quantity-input">
+                <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+            </form>
+            {% endif %}
+            {% if product.seller %}
+            <p style="margin-top:16px;font-size:.85rem;color:var(--gray-500)">Sold by <strong>{{ product.seller.username }}</strong></p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if related %}
+    <section>
+        <div class="section-header">
+            <h2>Related Products</h2>
+        </div>
+        <div class="product-grid">
+            {% for p in related %}
+            <div class="card product-card">
+                <a href="{{ url_for('marketplace.product_detail', slug=p.slug) }}">
+                    <div class="product-image">
+                        {% if p.image_url %}
+                            <img src="{{ p.image_url }}" alt="{{ p.name }}">
+                        {% else %}
+                            <div class="placeholder">&#128722;</div>
+                        {% endif %}
+                    </div>
+                </a>
+                <div class="product-info">
+                    <div class="product-name">{{ p.name }}</div>
+                    <div class="product-price">&pound;{{ "%.2f"|format(p.price) }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
