@@ -1,0 +1,133 @@
+{% extends "crm/base_crm.html" %}
+{% block title %}{{ contact.first_name }} {{ contact.last_name or '' }} - CRM{% endblock %}
+{% block crm_content %}
+<div class="section-header">
+    <h2>{{ contact.first_name }} {{ contact.last_name or '' }}</h2>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('crm.edit_contact', id=contact.id) }}" class="btn btn-outline">Edit</a>
+        <form method="POST" action="{{ url_for('crm.delete_contact', id=contact.id) }}" onsubmit="return confirm('Delete this contact?')">
+            <button class="btn btn-danger btn-sm">Delete</button>
+        </form>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:300px 1fr;gap:24px">
+    <!-- Contact Info -->
+    <div class="card">
+        <div class="card-header">Contact Info</div>
+        <div class="card-body">
+            <p><strong>Email:</strong> {{ contact.email or '-' }}</p>
+            <p><strong>Phone:</strong> {{ contact.phone or '-' }}</p>
+            <p><strong>Company:</strong> {{ contact.company or '-' }}</p>
+            <p><strong>Title:</strong> {{ contact.job_title or '-' }}</p>
+            <p><strong>Source:</strong> <span class="badge badge-gray">{{ contact.source or 'N/A' }}</span></p>
+            <p><strong>Status:</strong> <span class="badge badge-{% if contact.status == 'active' %}success{% else %}gray{% endif %}">{{ contact.status|title }}</span></p>
+            <p style="font-size:.8rem;color:var(--gray-500);margin-top:12px">Created {{ contact.created_at.strftime('%d %b %Y') }}</p>
+        </div>
+    </div>
+
+    <div>
+        <!-- Add Note -->
+        <div class="card mb-3">
+            <div class="card-header">Add Note</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('crm.new_note') }}">
+                    <input type="hidden" name="contact_id" value="{{ contact.id }}">
+                    <div class="form-group">
+                        <textarea name="content" class="form-control" rows="2" placeholder="Write a note..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Save Note</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Log Interaction -->
+        <div class="card mb-3">
+            <div class="card-header">Log Interaction</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('crm.new_interaction') }}">
+                    <input type="hidden" name="contact_id" value="{{ contact.id }}">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select name="type" class="form-control">
+                                <option value="email">Email</option>
+                                <option value="call">Call</option>
+                                <option value="meeting">Meeting</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Direction</label>
+                            <select name="direction" class="form-control">
+                                <option value="outbound">Outbound</option>
+                                <option value="inbound">Inbound</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" name="subject" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Details</label>
+                        <textarea name="body" class="form-control" rows="2"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Log Interaction</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="card">
+            <div class="card-header">Activity</div>
+            <div class="card-body" style="padding:0">
+                <table>
+                    <tbody>
+                        {% for note in notes %}
+                        <tr>
+                            <td>
+                                <span class="badge badge-info">Note</span>
+                                {{ note.content[:100] }}
+                                <div style="font-size:.75rem;color:var(--gray-400)">{{ note.created_at.strftime('%d %b %Y %H:%M') }}</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% for i in interactions %}
+                        <tr>
+                            <td>
+                                <span class="badge badge-{% if i.type == 'email' %}primary{% elif i.type == 'call' %}warning{% else %}success{% endif %}">{{ i.type|title }}</span>
+                                <strong>{{ i.subject or 'No subject' }}</strong> ({{ i.direction }})
+                                <div style="font-size:.75rem;color:var(--gray-400)">{{ i.created_at.strftime('%d %b %Y %H:%M') }}</div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not notes and not interactions %}
+                        <tr><td class="text-center" style="padding:30px;color:var(--gray-400)">No activity yet</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Leads -->
+        {% if leads %}
+        <div class="card mt-3">
+            <div class="card-header">Associated Leads</div>
+            <div class="card-body" style="padding:0">
+                <table>
+                    <tbody>
+                        {% for lead in leads %}
+                        <tr>
+                            <td><strong>{{ lead.title }}</strong></td>
+                            <td>&pound;{{ "{:,.0f}".format(lead.value) }}</td>
+                            <td><span class="badge badge-info">{{ lead.stage|title }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
