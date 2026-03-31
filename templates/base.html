@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MarketHub{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <div class="container">
+                <a href="{{ url_for('marketplace.index') }}" class="navbar-brand">
+                    MarketHub <span>STORE</span>
+                </a>
+                <ul class="navbar-links">
+                    <li><a href="{{ url_for('marketplace.index') }}">Home</a></li>
+                    <li><a href="{{ url_for('marketplace.products') }}">Products</a></li>
+                    <li>
+                        <a href="{{ url_for('marketplace.cart') }}">
+                            Cart
+                            {% set cart_count = session.get('cart', {})|length %}
+                            {% if cart_count > 0 %}
+                                <span class="cart-badge">{{ cart_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% if session.get('user_id') %}
+                        {% if session.get('role') == 'admin' %}
+                            <li><a href="{{ url_for('crm.dashboard') }}">CRM</a></li>
+                        {% endif %}
+                        <li><a href="{{ url_for('auth.logout') }}">Logout ({{ session.get('username') }})</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li><a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container" style="margin-top:16px">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div>
+                        <h4>MarketHub</h4>
+                        <p>Your one-stop product marketplace with powerful CRM tools built in.</p>
+                    </div>
+                    <div>
+                        <h4>Shop</h4>
+                        <a href="{{ url_for('marketplace.products') }}">All Products</a>
+                        <a href="{{ url_for('marketplace.products', sort='price_low') }}">Deals</a>
+                    </div>
+                    <div>
+                        <h4>Account</h4>
+                        <a href="{{ url_for('auth.login') }}">Login</a>
+                        <a href="{{ url_for('auth.register') }}">Register</a>
+                    </div>
+                    <div>
+                        <h4>Support</h4>
+                        <a href="#">Help Centre</a>
+                        <a href="#">Contact Us</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    &copy; 2026 MarketHub. All rights reserved.
+                </div>
+            </div>
+        </footer>
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
