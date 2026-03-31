@@ -1,0 +1,72 @@
+{% extends "crm/base_crm.html" %}
+{% block title %}Contacts - CRM{% endblock %}
+{% block crm_content %}
+<div class="section-header">
+    <h2>Contacts</h2>
+    <div class="d-flex gap-2">
+        <form action="{{ url_for('crm.contacts') }}" method="GET" class="d-flex gap-2">
+            <input type="text" name="q" class="form-control" placeholder="Search contacts..." value="{{ search or '' }}" style="width:220px">
+            <button type="submit" class="btn btn-secondary btn-sm">Search</button>
+        </form>
+        <a href="{{ url_for('crm.new_contact') }}" class="btn btn-primary">+ New Contact</a>
+    </div>
+</div>
+
+{% if contacts.items %}
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Company</th>
+                    <th>Source</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in contacts.items %}
+                <tr>
+                    <td><a href="{{ url_for('crm.contact_detail', id=c.id) }}"><strong>{{ c.first_name }} {{ c.last_name or '' }}</strong></a></td>
+                    <td>{{ c.email or '-' }}</td>
+                    <td>{{ c.company or '-' }}</td>
+                    <td><span class="badge badge-gray">{{ c.source or 'N/A' }}</span></td>
+                    <td><span class="badge badge-{% if c.status == 'active' %}success{% else %}gray{% endif %}">{{ c.status|title }}</span></td>
+                    <td>{{ c.created_at.strftime('%d %b %Y') }}</td>
+                    <td>
+                        <a href="{{ url_for('crm.edit_contact', id=c.id) }}" class="btn btn-outline btn-sm">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if contacts.pages > 1 %}
+<div class="pagination">
+    {% if contacts.has_prev %}
+        <a href="{{ url_for('crm.contacts', page=contacts.prev_num, q=search) }}">Prev</a>
+    {% endif %}
+    {% for p in contacts.iter_pages() %}
+        {% if p %}
+            <a href="{{ url_for('crm.contacts', page=p, q=search) }}" class="{% if p == contacts.page %}active{% endif %}">{{ p }}</a>
+        {% endif %}
+    {% endfor %}
+    {% if contacts.has_next %}
+        <a href="{{ url_for('crm.contacts', page=contacts.next_num, q=search) }}">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <div class="icon">&#128101;</div>
+    <p>No contacts found.</p>
+    <a href="{{ url_for('crm.new_contact') }}" class="btn btn-primary">Add First Contact</a>
+</div>
+{% endif %}
+{% endblock %}
