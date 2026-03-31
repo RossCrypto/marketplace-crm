@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="crm-layout">
+    <aside class="crm-sidebar">
+        <h3>CRM</h3>
+        <ul class="crm-nav">
+            <li><a href="{{ url_for('crm.dashboard') }}" class="{% if request.endpoint == 'crm.dashboard' %}active{% endif %}"><span class="nav-icon">&#9632;</span> Dashboard</a></li>
+            <li><a href="{{ url_for('crm.contacts') }}" class="{% if 'contact' in request.endpoint %}active{% endif %}"><span class="nav-icon">&#128101;</span> Contacts</a></li>
+            <li><a href="{{ url_for('crm.leads') }}" class="{% if 'lead' in request.endpoint %}active{% endif %}"><span class="nav-icon">&#128200;</span> Leads & Pipeline</a></li>
+            <li><a href="{{ url_for('crm.tasks') }}" class="{% if 'task' in request.endpoint %}active{% endif %}"><span class="nav-icon">&#9745;</span> Tasks</a></li>
+            <li><a href="{{ url_for('crm.notes') }}" class="{% if 'note' in request.endpoint %}active{% endif %}"><span class="nav-icon">&#128196;</span> Notes</a></li>
+            <li><a href="{{ url_for('crm.analytics') }}" class="{% if 'analytics' in request.endpoint %}active{% endif %}"><span class="nav-icon">&#128202;</span> Analytics</a></li>
+        </ul>
+        <h3 style="margin-top:30px">Marketplace</h3>
+        <ul class="crm-nav">
+            <li><a href="{{ url_for('marketplace.index') }}"><span class="nav-icon">&#127968;</span> Storefront</a></li>
+            <li><a href="{{ url_for('marketplace.products') }}"><span class="nav-icon">&#128722;</span> Products</a></li>
+        </ul>
+    </aside>
+    <main class="crm-main">
+        {% block crm_content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}
