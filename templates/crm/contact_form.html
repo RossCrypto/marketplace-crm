@@ -1,0 +1,61 @@
+{% extends "crm/base_crm.html" %}
+{% block title %}{{ 'Edit' if contact else 'New' }} Contact - CRM{% endblock %}
+{% block crm_content %}
+<div class="section-header">
+    <h2>{{ 'Edit' if contact else 'New' }} Contact</h2>
+    <a href="{{ url_for('crm.contacts') }}" class="btn btn-outline">Back to Contacts</a>
+</div>
+
+<div class="card" style="max-width:700px">
+    <div class="card-body">
+        <form method="POST">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name *</label>
+                    <input type="text" name="first_name" class="form-control" required value="{{ contact.first_name if contact else '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" class="form-control" value="{{ contact.last_name if contact else '' }}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ contact.email if contact else '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" class="form-control" value="{{ contact.phone if contact else '' }}">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Company</label>
+                    <input type="text" name="company" class="form-control" value="{{ contact.company if contact else '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Job Title</label>
+                    <input type="text" name="job_title" class="form-control" value="{{ contact.job_title if contact else '' }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Source</label>
+                <select name="source" class="form-control">
+                    {% for src in ['website', 'referral', 'social', 'email', 'other'] %}
+                        <option value="{{ src }}" {% if contact and contact.source == src %}selected{% endif %}>{{ src|title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea name="notes" class="form-control">{{ contact.notes_text if contact else '' }}</textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">{{ 'Update' if contact else 'Create' }} Contact</button>
+                <a href="{{ url_for('crm.contacts') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
