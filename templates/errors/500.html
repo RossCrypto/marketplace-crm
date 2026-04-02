@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Server Error{% endblock %}
+{% block content %}
+<div style="text-align:center; padding:80px 20px;">
+    <h1 style="font-size:4rem; color:#e74c3c; margin-bottom:0.5rem;">500</h1>
+    <h2 style="margin-bottom:1rem;">Something Went Wrong</h2>
+    <p style="color:#666; margin-bottom:2rem;">We're experiencing a technical issue. Please try again in a moment.</p>
+    <a href="{{ url_for('marketplace.index') }}" class="btn btn-primary">Back to Home</a>
+</div>
+{% endblock %}
